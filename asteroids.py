@@ -11,6 +11,7 @@ pg.display.set_caption('Dodge the Asteroid!')
 stars = pg.image.load('starrynight.png')
 icon = pg.image.load('asteroidicon.png')
 pg.display.set_icon(icon)
+menu_ship = pg.image.load('asteroidspaceship.png')
 
 clock = pg.time.Clock()
 
@@ -78,16 +79,35 @@ def score_count(score):
     game_display.blit(text, (0, 0))
 
 
-def text_objects(text, font):
-    textSurface = font.render(text, True, (255, 0, 0))
+def text_objects(text, font, color):
+    textSurface = font.render(text, True, color)
     return textSurface, textSurface.get_rect()
 
 
-def message_display(text, x, y):
-    largeText = pg.font.Font('freesansbold.ttf', 115)
-    TextSurf, TextRect = text_objects(text, largeText)
+def message_display(text, x, y, color, size):
+    largeText = pg.font.Font('freesansbold.ttf', size)
+    TextSurf, TextRect = text_objects(text, largeText, color)
     TextRect.center = (x, y)
     game_display.blit(TextSurf, TextRect)
+
+
+def button(msg, x, y, w, h, ic, ac, txtcolor, action=None):
+    mouse = pg.mouse.get_pos()
+    click = pg.mouse.get_pressed()
+
+    if x + w > mouse[0] > x and y + h > mouse[1] > y:
+        pg.draw.rect(game_display, ac, (x, y, w, h))
+        if click[0] == 1 and action != None:
+            action()
+            if action == pg.quit:
+                quit()
+    else:
+        pg.draw.rect(game_display, ic, (x, y, w, h))
+
+    smallText = pg.font.Font('freesansbold.ttf', 20)
+    textSurf, textRect = text_objects(msg, smallText, txtcolor)
+    textRect.center = ((x + (w / 2)), (y + (h / 2)))
+    game_display.blit(textSurf, textRect)
 
 
 def game_loop():
@@ -177,12 +197,35 @@ def end_screen(score):
                 quit()
         game_display.fill((0, 0, 0))
         message_display('You crashed!', (display_width / 2),
-                        (display_height / 2))
+                        ((display_height / 2) - 100), (200, 0, 0), 115)
         message_display('Score: ' + str(score),
-                        (display_width / 2), ((display_height / 2) + 100))
+                        (display_width / 2), (display_height / 2), (200, 0, 0), 115)
+        button('Play Again', 250, ((display_width / 2) + 100), 120, 50,
+               (200, 0, 0), (255, 0, 0), (0, 0, 0), game_loop)
+        button('Exit', 430, ((display_width / 2) + 100), 120,
+               50, (200, 0, 0), (255, 0, 0), (0, 0, 0), pg.quit)
         pg.display.flip()
 
 
-game_loop()
+def start_menu():
+    while True:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                quit()
+        game_display.fill((0, 0, 0))
+        message_display('Dodge the Asteroid!',
+                        (display_width / 2), 100, (0, 255, 0), 60)
+        message_display('Use WASD to move.',
+                        (display_width / 2), 350, (0, 255, 0), 50)
+        game_display.blit(menu_ship, (375, 200))
+        button('Play', 250, ((display_width / 2) + 100), 120, 50,
+               (0, 200, 0), (0, 255, 0), (0, 0, 0), game_loop)
+        button('Exit', 430, ((display_width / 2) + 100), 120,
+               50, (0, 200, 0), (0, 255, 0), (0, 0, 0), pg.quit)
+        pg.display.flip()
+
+
+start_menu()
 pg.quit()
 quit()
