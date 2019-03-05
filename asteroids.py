@@ -1,9 +1,10 @@
+# Created by Doug Schurman
 import pygame as pg
 import random
 
 
-pg.init()
-
+pg.init()  # Loading Pygame
+# Setting up display and images
 display_width = 800
 display_height = 600
 game_display = pg.display.set_mode((display_width, display_height))
@@ -13,9 +14,10 @@ icon = pg.image.load('asteroidicon.png')
 pg.display.set_icon(icon)
 menu_ship = pg.image.load('asteroidspaceship.png')
 
-clock = pg.time.Clock()
+clock = pg.time.Clock()  # Keeping track of time
 
 
+# Creating sprite classes to move ingame objects
 class Spaceship(pg.sprite.Sprite):
     def __init__(self, startx, starty):
         pg.sprite.Sprite.__init__(self)
@@ -68,11 +70,13 @@ class MediumAsteroid(pg.sprite.Sprite):
         self.rect.x -= 3
 
 
+# Checking collisions between sprite groups and deleting group 1 if collided
 def check_collide(group1, group2):
     collisions = pg.sprite.groupcollide(group1, group2, True, True)
     return collisions
 
 
+# Displaying the score to the display
 def score_count(score):
     font = pg.font.SysFont(None, 25)
     text = font.render('Score: ' + str(score), True, (255, 0, 0))
@@ -84,6 +88,7 @@ def text_objects(text, font, color):
     return textSurface, textSurface.get_rect()
 
 
+# Dispays message from the object returend from text_objects
 def message_display(text, x, y, color, size):
     largeText = pg.font.Font('freesansbold.ttf', size)
     TextSurf, TextRect = text_objects(text, largeText, color)
@@ -91,6 +96,7 @@ def message_display(text, x, y, color, size):
     game_display.blit(TextSurf, TextRect)
 
 
+# Creates a button with a chosen function
 def button(msg, x, y, w, h, ic, ac, txtcolor, action=None):
     mouse = pg.mouse.get_pos()
     click = pg.mouse.get_pressed()
@@ -114,14 +120,14 @@ def game_loop():
     ship = Spaceship(375, 275)
     ships = pg.sprite.Group()
     ships.add(ship)
-
+    # Creating lists and sprite groups for objects
     left_asteroids_list = []
     top_asteroids_list = []
     right_asteroids_list = []
     right_asteroids = pg.sprite.Group()
     top_asteroids = pg.sprite.Group()
     left_asteroids = pg.sprite.Group()
-
+    # Keeping track of time to regulate output
     playing = True
     top_asteroid_time = 0
     left_asteroid_time = 0
@@ -134,11 +140,11 @@ def game_loop():
         left_asteroid_time += dt
         right_asteroid_time += dt
         score_time += dt
-        for event in pg.event.get():
+        for event in pg.event.get():  # Main way to check for clicking X
             if event.type == pg.QUIT:
                 pg.quit()
                 quit()
-        keys = pg.key.get_pressed()
+        keys = pg.key.get_pressed()  # Dictionary to check keys pressed
         if keys[pg.K_a]:
             ship.move_left()
         if keys[pg.K_d]:
@@ -148,10 +154,10 @@ def game_loop():
         if keys[pg.K_s]:
             ship.move_down()
 
-        if score_time >= 1020:
+        if score_time >= 1020:  # Keeping track of score almost every second
             score += 1
             score_time = 0
-
+        # Regulating and creating randomly placed asteroids
         if top_asteroid_time > 1560:
             top_asteroids_list.append(SmallAsteroid(
                 random.randint(0, 750), -50))
@@ -168,27 +174,29 @@ def game_loop():
 
         game_display.blit(stars, (0, 0))
         ships.draw(game_display)
-        left_asteroids.update('left')
+        left_asteroids.update('left')  # Moving asteroids if present
         top_asteroids.update('top')
         right_asteroids.update()
-
+        # Drawing asteroids to display
         left_asteroids.draw(game_display)
         top_asteroids.draw(game_display)
         right_asteroids.draw(game_display)
         right_collides = check_collide(ships, right_asteroids)
         left_collides = check_collide(ships, left_asteroids)
         top_collides = check_collide(ships, top_asteroids)
+        # Adding all asteroids to group
         right_asteroids.add(right_asteroids_list)
         left_asteroids.add(left_asteroids_list)
         top_asteroids.add(top_asteroids_list)
         score_count(score)
         if len(right_collides) > 0 or len(left_collides) > 0 or len(top_collides) > 0:
-            playing = False
+            playing = False  # Making sure if the ship collides the game stops
             end_screen(score)
-        pg.display.flip()
+        pg.display.flip()  # Refreshing display every loop
     return score
 
 
+# Menu to display once the ship has crashed with buttons and score
 def end_screen(score):
     while True:
         for event in pg.event.get():
@@ -207,6 +215,7 @@ def end_screen(score):
         pg.display.flip()
 
 
+# Menu to start the game or exit
 def start_menu():
     while True:
         for event in pg.event.get():
@@ -226,6 +235,6 @@ def start_menu():
         pg.display.flip()
 
 
-start_menu()
-pg.quit()
+start_menu()  # Starting the progression towards the game
+pg.quit()  # Back up quit method and function to prevent Pygame from failing to quit
 quit()
